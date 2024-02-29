@@ -10,13 +10,14 @@
 - [Funcionalidades de la Aplicación](#funcionalidades-de-la-aplicación)
 - [Tecnologías Utilizadas](#tecnologías-utilizadas)
 - [Diccionario de datos](#diccionario-de-datos)
+- [Documentación de Google Cloud](#documentación-de-google-cloud)
 
 ## Equipo
 
-- **Cristian** - Encargado de Machine Learning / Arquitecto de Nube
-- **Freddy** - Ingeniero de Datos
-- **Juan** - Analista de Datos
-- **Mauro** - Ingeniero de Datos / Coordinador
+- **Cristian** - Machine Learning Engineer & Cloud Architect
+- **Freddy** - Data Engineer
+- **Juan** - Data Analyst
+- **Mauro** - Data Engineer & Project Manager
 
 ## Descripción del Proyecto
 
@@ -42,18 +43,37 @@ Estar al tanto de las tendencias del mercado antes que la competencia les permit
 
 ## Tecnologías Utilizadas
 
-- Python
-- Pandas
-- Google Cloud
-- Cloud Storage
-- BigQuery
-- Looker
-- Cloud Functions
+**Lenguajes:**
+
+* **Python** ![Icono Python](https://img.shields.io/badge/-Python-3776AB?style=flat-square&logo=python&logoColor=white)
+
+**Plataformas en la Nube:**
+
+* **Google Cloud Platform** ![Icono Google Cloud Platform](https://img.shields.io/badge/-Google%20Cloud%20Platform-4285F4?style=flat-square&logo=google-cloud&logoColor=white)
+
+**Servicios en la Nube:**
+
+* **Cloud Storage** ![Icono Cloud Storage](https://img.shields.io/badge/-Cloud%20Storage-4285F4?style=flat-square&logo=google-cloud&logoColor=white)
+* **BigQuery** ![Icono BigQuery](https://img.shields.io/badge/-BigQuery-4285F4?style=flat-square&logo=google-cloud&logoColor=white)
+* **Looker** ![Icono Looker](https://img.shields.io/badge/-Looker-4285F4?style=flat-square&logo=looker&logoColor=white)
+* **Cloud Functions** ![Icono Cloud Functions](https://img.shields.io/badge/-Cloud%20Functions-4285F4?style=flat-square&logo=google-cloud&logoColor=white)
+
+**Herramientas:**
+
+* **Visual Studio Code** ![Icono Visual Studio Code](https://img.shields.io/badge/-Visual%20Studio%20Code-007ACC?style=flat-square&logo=visual-studio-code&logoColor=white)
+
+**Librerías:**
+
+* **Pandas** ![Icono Pandas](https://img.shields.io/badge/-Pandas-150458?style=flat-square&logo=pandas&logoColor=white)
+* **google-cloud-storage** ![Icono Google Cloud Storage](https://img.shields.io/badge/-google%20cloud%20storage-4285F4?style=flat-square&logo=google-cloud&logoColor=white)
+* **google-cloud-bigquery** ![Icono Google Cloud BigQuery](https://img.shields.io/badge/-google%20cloud%20bigquery-4285F4?style=flat-square&logo=google-cloud&logoColor=white)
+* **google-cloud-looker** ![Icono Google Cloud Looker](https://img.shields.io/badge/-google%20cloud%20looker-4285F4?style=flat-square&logo=google-cloud&logoColor=white)
+* **google-cloud-functions** ![Icono Google Cloud Functions](https://img.shields.io/badge/-google%20cloud%20functions-4285F4?style=flat-square&logo=google-cloud&logoColor=white)
+
 
 ## Diccionario de Datos
 
 Para acceder al diccionario de los datos que fueron utilizados, haz clic [aquí](https://docs.google.com/spreadsheets/d/1XcSjLU8MoPs-hAQ-IFvJBB62JxYPsdkTPjVMkZv_DaQ/edit#gid=1680658120).
-
 
 ## Funcionalidades de la Aplicación
 
@@ -64,3 +84,8 @@ La aplicación desarrollada proporcionará:
 - Informes detallados para una toma de decisiones informada.
 - Potencial integración futura de un sistema de conveniencia de emplazamiento de nuevos locales.
 - Potencial integración futura de un sistema de recomendación exclusivo de los negocios dentro del dominio del cliente.
+
+
+## Documentación de Google Cloud
+
+Para obtener información detallada sobre la conexión a Google Cloud y la verificación de servicios API, consulta nuestra documentación en [Notion](https://www.notion.so/Documentaci-n-c90a6c8e6f554db2b427b147d8bac6e6?pvs=4).
