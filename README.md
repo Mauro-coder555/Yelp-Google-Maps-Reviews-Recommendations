@@ -9,6 +9,7 @@
 - [Beneficios para el Product Owner (PO)](#beneficios-para-el-product-owner-po)
 - [Funcionalidades de la Aplicación](#funcionalidades-de-la-aplicación)
 - [Tecnologías Utilizadas](#tecnologías-utilizadas)
+- [Flujo de trabajo](#flujo-de-trabajo)
 - [Diccionario de datos](#diccionario-de-datos)
 - [Documentación de Google Cloud](#documentación-de-google-cloud)
 
@@ -70,6 +71,10 @@ Estar al tanto de las tendencias del mercado antes que la competencia les permit
 * **google-cloud-looker** ![Icono Google Cloud Looker](https://img.shields.io/badge/-google%20cloud%20looker-4285F4?style=flat-square&logo=google-cloud&logoColor=white)
 * **google-cloud-functions** ![Icono Google Cloud Functions](https://img.shields.io/badge/-google%20cloud%20functions-4285F4?style=flat-square&logo=google-cloud&logoColor=white)
 
+
+## Flujo de trabajo
+
+Para acceder a una imagen con el flujo de trabajo utilizado, haz clic [aquí](https://www.notion.so/Flujo-de-trabajo-c7235773bc03479eaa8bfb0fc5d698a5).
 
 ## Diccionario de Datos
 
