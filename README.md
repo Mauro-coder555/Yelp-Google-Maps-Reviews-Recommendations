@@ -52,7 +52,7 @@ Estar al tanto de las tendencias del mercado antes que la competencia les permit
 
 ## Diccionario de Datos
 
-Para acceder al diccionario de los datos que fueron utilizados, haz clic [aquí]('https://docs.google.com/spreadsheets/d/1XcSjLU8MoPs-hAQ-IFvJBB62JxYPsdkTPjVMkZv_DaQ/edit#gid=1680658120').
+Para acceder al diccionario de los datos que fueron utilizados, haz clic [aquí](https://docs.google.com/spreadsheets/d/1XcSjLU8MoPs-hAQ-IFvJBB62JxYPsdkTPjVMkZv_DaQ/edit#gid=1680658120).
 
 
 ## Funcionalidades de la Aplicación
