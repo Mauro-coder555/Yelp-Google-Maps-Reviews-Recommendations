@@ -5,7 +5,7 @@ from google.cloud import storage
 ALLOWED_EXTENSIONS = {".csv"}
 
 # Configuración de Cloud Storage
-credentials_path = "C:/Users/Work/Downloads/eminent-cycle-415715-3ef9bde04901.json"
+credentials_path = "../credentials/eminent-cycle-415715-3ef9bde04901.json"
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = credentials_path
 bucket_name = "yelp-ggmaps-data"
 client = storage.Client()
