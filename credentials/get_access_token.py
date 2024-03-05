@@ -26,7 +26,7 @@ def get_access_token(credentials_path):
     return None
 
 if __name__ == "__main__":
-  credentials_path = "C:/Users/Work/Downloads/eminent-cycle-415715-3ef9bde04901.json"
+  credentials_path = "eminent-cycle-415715-3ef9bde04901.json"
   access_token = get_access_token(credentials_path)
 
   if access_token:
