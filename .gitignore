@@ -164,3 +164,6 @@ Data/
 
 # Tests
 Test/
+
+# Credentials
+credentials/
