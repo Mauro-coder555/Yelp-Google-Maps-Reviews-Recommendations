@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 
 def check_rows(ruta_archivo, parametro):
     # Diccionario que contiene los nombres de columnas correspondientes a cada tabla
@@ -58,6 +59,21 @@ def procesar_nulos_duplicados(df_base,df_nuevo,df_unique_ids,tipo):
 
             # Resetear los índices después de las operaciones
             df_concat = df_concat.reset_index(drop=True)
+
+             # Encontrar los business_id únicos en df_concat
+            business_id_concat_unicos = df_concat['business_id'].unique()
+
+            # Filtrar los business_id que no están en df_unique_ids
+            business_id_no_en_unique = np.setdiff1d(business_id_concat_unicos, df_unique_ids['business_id'])
+
+            # Crear un DataFrame con los business_id que no están en df_unique_ids
+            df_nuevos_business_id = pd.DataFrame({'business_id': business_id_no_en_unique})
+
+            # Combinar df_nuevos_business_id con df_unique_ids
+            df_unique_actualizado = pd.concat([df_unique_ids, df_nuevos_business_id], ignore_index=True)
+
+            # Actualizar ids unicos
+            df_unique_actualizado.to_csv("unique_ids.csv", index=False)
 
             pass
         elif tipo == "review":
@@ -146,6 +162,21 @@ def procesar_nulos_duplicados(df_base,df_nuevo,df_unique_ids,tipo):
             # Eliminar duplicados de user_id, conservando la fila con el mayor conteo de reviews
             df_concat = df_concat.sort_values(by=['user_id', 'review_count'], ascending=[True, False])
             df_concat = df_concat.drop_duplicates(subset='user_id', keep='first')
+
+            # Encontrar los user_id únicos en df_concat
+            user_id_concat_unicos = df_concat['user_id'].unique()
+
+            # Filtrar los user_id que no están en df_unique_ids
+            user_id_no_en_unique = np.setdiff1d(user_id_concat_unicos, df_unique_ids['user_id'])
+
+            # Crear un DataFrame con los user_id que no están en df_unique_ids
+            df_nuevos_user_id = pd.DataFrame({'user_id': user_id_no_en_unique})
+
+            # Combinar df_nuevos_user_id con df_unique_ids
+            df_unique_actualizado = pd.concat([df_unique_ids, df_nuevos_user_id], ignore_index=True)
+
+            # Actualizar ids unicos
+            df_unique_actualizado.to_csv("unique_ids.csv", index=False)
 
             pass
 
