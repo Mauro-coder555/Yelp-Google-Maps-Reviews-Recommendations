@@ -1,6 +1,7 @@
 from google.oauth2 import service_account
 from google.cloud import storage
 import pandas as pd
+import os
 
 def set_config():
     # Configuración de Google Cloud Storage
@@ -37,3 +38,36 @@ def cargar_df(path):
     except Exception as e:
         print("Error al cargar el DataFrame:", e)
         return None
+    
+def obtener_ruta_archivo_nuevo_csv():
+    # Ruta de la carpeta principal
+    carpeta_principal = "new/yelp"
+
+    # Lista los archivos dentro de la carpeta principal
+    archivos = os.listdir(carpeta_principal)
+
+    # Encuentra el archivo CSV dentro de la lista de archivos
+    archivo_csv = next((archivo for archivo in archivos if archivo.endswith(".csv")), None)
+
+    # Si se encontró un archivo CSV, devuelve la ruta completa
+    if archivo_csv:
+        ruta_completa = os.path.join(carpeta_principal, archivo_csv)
+        return ruta_completa
+    else:
+        return None
+    
+def borrar_archivo_nuevo():
+    # Ruta de la carpeta principal
+    carpeta_principal = "new/yelp"
+
+    try:
+        # Elimina todos los archivos dentro de la carpeta
+        for archivo in os.listdir(carpeta_principal):
+            ruta_archivo = os.path.join(carpeta_principal, archivo)
+            if os.path.isfile(ruta_archivo):
+                os.remove(ruta_archivo)
+        print("Se han borrado todos los archivos dentro de la carpeta 'new/yelp'.")
+    except FileNotFoundError:
+        print("La carpeta 'new/yelp' no existe.")
+    except OSError as e:
+        print(f"No se pudo eliminar los archivos de la carpeta 'new/yelp': {e}")
