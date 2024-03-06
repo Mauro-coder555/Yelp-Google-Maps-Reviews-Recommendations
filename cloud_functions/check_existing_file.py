@@ -14,7 +14,7 @@ def is_file_uploaded(bucket_name, file_name):
     if not allowed_file(file_name):
         return False
 
-    client = storage_client("C:/Users/Work/Downloads/eminent-cycle-415715-3ef9bde04901.json")
+    client = storage_client("../credentials/eminent-cycle-415715-3ef9bde04901.json")
     bucket = client.bucket(bucket_name)
     
     # Verificar si el archivo ya existe en Cloud Storage

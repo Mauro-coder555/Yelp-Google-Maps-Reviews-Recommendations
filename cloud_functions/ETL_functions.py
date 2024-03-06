@@ -29,13 +29,10 @@ def check_rows(ruta_archivo, parametro):
     if all(col in df.columns for col in columnas[parametro]):
         return True
     else:
-        return False
-    
+        return False    
 
 
-def procesar_nulos_duplicados(df_base,df_nuevo,df_unique_ids,tipo):
-        
-        
+def procesar_nulos_duplicados(df_base,df_nuevo,df_unique_ids,tipo):        
 
         # Casos para hacer cosas en función del parámetro
         if tipo == "business":
@@ -73,11 +70,11 @@ def procesar_nulos_duplicados(df_base,df_nuevo,df_unique_ids,tipo):
             df_unique_actualizado = pd.concat([df_unique_ids, df_nuevos_business_id], ignore_index=True)
 
             # Actualizar ids unicos
-            df_unique_actualizado.to_csv("unique_ids.csv", index=False)
+            df_unique_actualizado.to_csv("data_tools/unique_ids.csv", index=False)
 
             pass
         elif tipo == "review":
-            user_unique_ids = pd.read_csv('unique_user_ids.csv') 
+            user_unique_ids = pd.read_csv('data_tools/unique_user_ids.csv') 
 
             # Realizar la comprobación de ids existentes
             df_nuevo = df_nuevo[df_nuevo['business_id'].isin(df_unique_ids['business_id']) & df_nuevo['user_id'].isin(user_unique_ids['user_id'])]
@@ -105,7 +102,7 @@ def procesar_nulos_duplicados(df_base,df_nuevo,df_unique_ids,tipo):
 
             pass
         elif tipo == "tip":
-            user_unique_ids = pd.read_csv('unique_user_ids.csv')
+            user_unique_ids = pd.read_csv('data_tools/unique_user_ids.csv')
 
             # Realizar la comprobación de ids únicos
             df_nuevo = df_nuevo[df_nuevo['business_id'].isin(df_unique_ids['business_id']) & df_nuevo['user_id'].isin(user_unique_ids['user_id'])]
@@ -171,7 +168,7 @@ def procesar_nulos_duplicados(df_base,df_nuevo,df_unique_ids,tipo):
             user_id_concat_unicos = df_concat['user_id'].unique()
 
             # Filtrar los user_id que no están en user_unique_ids
-            user_unique_ids = pd.read_csv('unique_user_ids.csv')
+            user_unique_ids = pd.read_csv('data_tools/unique_user_ids.csv')
 
             user_id_no_en_unique = np.setdiff1d(user_id_concat_unicos, user_unique_ids['user_id'])
 
@@ -182,7 +179,7 @@ def procesar_nulos_duplicados(df_base,df_nuevo,df_unique_ids,tipo):
             df_unique_actualizado = pd.concat([user_unique_ids, df_nuevos_user_id], ignore_index=True)
 
             # Actualizar ids unicos
-            df_unique_actualizado.to_csv("user_unique_ids.csv", index=False)
+            df_unique_actualizado.to_csv("data_tools/user_unique_ids.csv", index=False)
 
             pass
 

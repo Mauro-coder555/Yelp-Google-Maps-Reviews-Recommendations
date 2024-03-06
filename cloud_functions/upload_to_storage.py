@@ -60,7 +60,7 @@ def upload_to_storage(local_folder_path, bucket_name, credentials_path):
         print(f" - {cloud_file}")
 
 if __name__ == "__main__":
-    credentials_path = "C:/Users/Work/Downloads/eminent-cycle-415715-3ef9bde04901.json"
+    credentials_path = "../credentials/eminent-cycle-415715-3ef9bde04901.json"
     local_folder_path = "data"
     cloud_storage_bucket = "yelp-ggmaps-data"
     upload_to_storage(local_folder_path, cloud_storage_bucket, credentials_path)
