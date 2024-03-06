@@ -11,6 +11,7 @@ bucket_name = "yelp-ggmaps-data"
 client = storage.Client()
 bucket = client.get_bucket(bucket_name)
 
+
 app = Flask(__name__)
 
 # Añadir un indicador de inicio de sesión
@@ -45,7 +46,7 @@ def upload():
         return 'Inicia sesión para subir archivos.'
     
     archivo = request.files['archivo']
-    file_name = "raw/" + request.form['carpeta'] + "/" + request.form['archivo_a_reemplazar']
+    file_name = "processed/" + request.form['carpeta'] + "/" + request.form['archivo_a_reemplazar']
 
     # Verificar si el archivo tiene una extensión permitida
     if not allowed_file(archivo.filename):
@@ -64,8 +65,8 @@ def upload():
 def get_folders():
     folders = []
 
-    # Obtener las carpetas dentro de la carpeta 'raw'
-    blobs = bucket.list_blobs(prefix='raw/')
+    # Obtener las carpetas dentro de la carpeta 'processed'
+    blobs = bucket.list_blobs(prefix='processed/')
     for blob in blobs:
         folder_name = os.path.dirname(blob.name)
         if folder_name not in folders:
