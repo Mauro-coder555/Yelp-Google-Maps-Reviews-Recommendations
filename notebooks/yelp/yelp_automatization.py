@@ -38,14 +38,14 @@ def process_file(ruta_archivo, parametro):
             df = df[(df['state'] == 'FL') | (df['state'] == 'CA') | (df['state'] == 'NV')]
 
             #Guardar los distintos establecimientos de los estados ya filtrados
-            unique_ids = pd.read_csv('unique_ids.csv')
+            unique_ids = pd.read_csv('unique_business_ids.csv')
 
             # Realizar la fusión basada en la columna 'business_id'
             merged_data = pd.merge(unique_ids, df, on='business_id', how='left')
             # Eliminar los duplicados manteniendo solo la última aparición
             merged_data.drop_duplicates(subset=['business_id'], keep='last', inplace=True)
             # Guardar el resultado en un nuevo archivo si lo deseas
-            merged_data.to_csv('unique_ids.csv', index=False)
+            merged_data.to_csv('unique_business_ids.csv', index=False)
             
             # Proceso ETL
             etl.procesar_nulos_duplicados(ut.cargar_df(processed_blob_path),df, merged_data, parametro)
@@ -56,7 +56,7 @@ def process_file(ruta_archivo, parametro):
         elif parametro == "review":
             processed_blob_path = "yelp/processed/review.csv"
             #Filtrar las reseñas por estados específicos obtenidos a partir de los negocios       
-            unique_ids = pd.read_csv('unique_ids.csv')
+            unique_ids = pd.read_csv('unique_business_ids.csv')
             df = df[df['business_id'].isin(unique_ids['business_id'])]
             
             # Proceso ETL
@@ -68,7 +68,7 @@ def process_file(ruta_archivo, parametro):
         elif parametro == "tip":
             processed_blob_path = "yelp/processed/tip.csv"
             #Filtrar los consejos por estados específicos obtenidos a partir de los negocios       
-            unique_ids = pd.read_csv('unique_ids.csv')
+            unique_ids = pd.read_csv('unique_business_ids.csv')
             df = df[df['business_id'].isin(unique_ids['business_id'])]
 
             # Proceso ETL
@@ -81,7 +81,7 @@ def process_file(ruta_archivo, parametro):
             processed_blob_path = "yelp/processed/checkin.csv"
 
             #Filtrar los consejos por estados específicos obtenidos a partir de los negocios       
-            unique_ids = pd.read_csv('unique_ids.csv')
+            unique_ids = pd.read_csv('unique_business_ids.csv')
             df = df[df['business_id'].isin(unique_ids['business_id'])]
 
             # Proceso ETL
