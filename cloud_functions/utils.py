@@ -41,7 +41,7 @@ def cargar_df(path):
     
 def obtener_ruta_archivo_nuevo_csv():
     # Ruta de la carpeta principal
-    carpeta_principal = "new/yelp"
+    carpeta_principal = "new/"
 
     # Lista los archivos dentro de la carpeta principal
     archivos = os.listdir(carpeta_principal)
@@ -58,7 +58,7 @@ def obtener_ruta_archivo_nuevo_csv():
     
 def borrar_archivo_nuevo():
     # Ruta de la carpeta principal
-    carpeta_principal = "new/yelp"
+    carpeta_principal = "new/"
 
     try:
         # Elimina todos los archivos dentro de la carpeta
@@ -66,8 +66,8 @@ def borrar_archivo_nuevo():
             ruta_archivo = os.path.join(carpeta_principal, archivo)
             if os.path.isfile(ruta_archivo):
                 os.remove(ruta_archivo)
-        print("Se han borrado todos los archivos dentro de la carpeta 'new/yelp'.")
+        print("Se han borrado todos los archivos dentro de la carpeta 'new/'.")
     except FileNotFoundError:
         print("La carpeta 'new/yelp' no existe.")
     except OSError as e:
-        print(f"No se pudo eliminar los archivos de la carpeta 'new/yelp': {e}")
+        print(f"No se pudo eliminar los archivos de la carpeta 'new/': {e}")
