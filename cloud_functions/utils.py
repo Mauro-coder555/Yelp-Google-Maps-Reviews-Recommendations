@@ -48,7 +48,7 @@ def obtener_ruta_archivo_nuevo_csv(bucket):
     else:
         raise ValueError("La carpeta 'new/' no contiene un único archivo.")
     
-def obtener_ruta_archivo_a_actualizar_csv(bucket, ruta):
+def obtener_data_archivo_a_actualizar_csv(bucket, ruta):
     blob = bucket.blob(ruta)
     data = blob.download_as_bytes()
     return data
