@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import utils as ut
 
 def check_rows(df, parametro):
     # Diccionario que contiene los nombres de columnas correspondientes a cada tabla
@@ -25,7 +26,7 @@ def check_rows(df, parametro):
         return False    
 
 
-def procesar_nulos_duplicados(df_base,df_nuevo,df_unique_ids,tipo):        
+def procesar_nulos_duplicados(df_base,df_nuevo,df_unique_business_ids,user_unique_ids,bucket,tipo):        
 
         # Casos para hacer cosas en función del parámetro
         if tipo == "business":
@@ -43,38 +44,35 @@ def procesar_nulos_duplicados(df_base,df_nuevo,df_unique_ids,tipo):
 
             # Concatenar dataframe base con dataframe nuevo
             df_concat = concatenar_dataframes(df_base, df_nuevo)
-
-            print(df_concat)
-
+            
             # Eliminar filas duplicadas basadas en 'business_id' dejando solo la que mayor cantidad de reviews tenga
             df_concat = df_concat.loc[df_concat.groupby('business_id')['review_count'].idxmax()]
 
             # Resetear los índices después de las operaciones
             df_concat = df_concat.reset_index(drop=True)
 
-            print(df_concat)
-
-           # Identificar business_id únicos presentes en df_concat pero no en df_unique_ids
-            nuevos_business_ids = set(df_concat['business_id']) - set(df_unique_ids['business_id'])
+           # Identificar business_id únicos presentes en df_concat pero no en df_unique_business_ids
+            nuevos_business_ids = set(df_concat['business_id']) - set(df_unique_business_ids['business_id'])
 
             # Filtrar filas de df_concat que contienen los nuevos business_id
             nuevos_datos = df_concat[df_concat['business_id'].isin(nuevos_business_ids)]
 
-            # Concatenar los nuevos datos al DataFrame df_unique_ids, manteniendo solo la columna "business_id"
-            df_unique_ids = pd.concat([df_unique_ids, nuevos_datos[['business_id']]], ignore_index=True)
+            # Concatenar los nuevos datos al DataFrame df_unique_business_ids, manteniendo solo la columna "business_id"
+            df_unique_business_ids = pd.concat([df_unique_business_ids, nuevos_datos[['business_id']]], ignore_index=True)
 
-            # Eliminar duplicados en el dataframe df_unique_ids
-            df_unique_ids = df_unique_ids.drop_duplicates(subset=['business_id'])
+            # Eliminar duplicados en el dataframe df_unique_business_ids
+            df_unique_business_ids = df_unique_business_ids.drop_duplicates(subset=['business_id'])
 
             # Guardar el dataframe actualizado en el archivo CSV
-            df_unique_ids.to_csv("data_tools/unique_business_ids_prueba.csv", index=False)
+
+            ut.save_in_storage(bucket,"used_ids/unique_business_ids.csv",df_unique_business_ids)
+            
 
             pass
-        elif tipo == "review":
-            user_unique_ids = pd.read_csv('data_tools/unique_user_ids.csv') 
+        elif tipo == "review":          
 
-            # Realizar la comprobación de ids existentes
-            df_nuevo = df_nuevo[df_nuevo['business_id'].isin(df_unique_ids['business_id']) & df_nuevo['user_id'].isin(user_unique_ids['user_id'])]
+            # Realizar la comprobación de ids existentes, no agregamos reseñas que tengas id's de negocios/usuarios que no existan en la base de antemano
+            df_nuevo = df_nuevo[df_nuevo['business_id'].isin(df_unique_business_ids['business_id']) & df_nuevo['user_id'].isin(user_unique_ids['user_id'])]
 
             # Definir criterio de integridad de fila
             threshold = int(0.7 * len(df_nuevo.columns))
@@ -82,8 +80,9 @@ def procesar_nulos_duplicados(df_base,df_nuevo,df_unique_ids,tipo):
             # Eliminar filas que no cumplen con el criterio de integridad
             df_nuevo = df_nuevo.dropna(thresh=threshold)
 
-            # Eliminar filas con valores nulos en columnas clave y fecha
-            df_nuevo = df_nuevo.dropna(subset=['review_id', 'user_id', 'business_id', 'date', 'stars', 'text'])
+            # Eliminar filas con valores nulos en algunas columnas de importancia
+            columnas_clave = ['review_id', 'user_id', 'business_id', 'date', 'stars', 'text']
+            df_nuevo = df_nuevo.loc[df_nuevo[columnas_clave].notnull().all(axis=1)]
 
             # Imputar valores nulos en el DataFrame
             df_nuevo.fillna('sin datos', inplace=True)    
@@ -98,11 +97,10 @@ def procesar_nulos_duplicados(df_base,df_nuevo,df_unique_ids,tipo):
             df_concat = df_concat.reset_index(drop=True)
 
             pass
-        elif tipo == "tip":
-            user_unique_ids = pd.read_csv('data_tools/unique_user_ids.csv')
+        elif tipo == "tip":          
 
             # Realizar la comprobación de ids únicos
-            df_nuevo = df_nuevo[df_nuevo['business_id'].isin(df_unique_ids['business_id']) & df_nuevo['user_id'].isin(user_unique_ids['user_id'])]
+            df_nuevo = df_nuevo[df_nuevo['business_id'].isin(df_unique_business_ids['business_id']) & df_nuevo['user_id'].isin(user_unique_ids['user_id'])]
 
             # Definir criterio de integridad de fila
             threshold = int(0.7 * len(df_nuevo.columns))
@@ -111,7 +109,8 @@ def procesar_nulos_duplicados(df_base,df_nuevo,df_unique_ids,tipo):
             df_nuevo = df_nuevo.dropna(thresh=threshold)
 
             # Eliminar filas con valores nulos en columnas mas importantes
-            df_nuevo = df_nuevo.dropna(subset=['text', 'date', 'compliment_count', 'business_id', 'user_id'])
+            columnas = ['text', 'date', 'compliment_count', 'business_id', 'user_id']
+            df_nuevo = df_nuevo.loc[df_nuevo[columnas].notnull().all(axis=1)]
 
             # Imputar valores nulos en el DataFrame
             df_nuevo.fillna('sin datos', inplace=True)            
@@ -125,12 +124,13 @@ def procesar_nulos_duplicados(df_base,df_nuevo,df_unique_ids,tipo):
             # Resetear los índices después de las operaciones
             df_concat = df_concat.reset_index(drop=True)
             pass
-        elif tipo == "checkin":          
+        elif tipo == "checkin":
+
             # Eliminar filas con valores nulos en business_id o date
-            df_nuevo = df_nuevo.dropna(subset=['business_id', 'date'])
+            df_nuevo = df_nuevo.loc[(df_nuevo['business_id'].notnull()) & (df_nuevo['date'].notnull())]
 
             # Realizar la comprobación de ids únicos
-            df_nuevo = df_nuevo[df_nuevo['business_id'].isin(df_unique_ids['business_id'])]
+            df_nuevo = df_nuevo[df_nuevo['business_id'].isin(df_unique_business_ids['business_id'])]
 
             # Concatenar dataframe base con dataframe nuevo
             df_concat = concatenar_dataframes(df_base, df_nuevo)
@@ -140,13 +140,17 @@ def procesar_nulos_duplicados(df_base,df_nuevo,df_unique_ids,tipo):
             df_concat = df_concat.sort_values(by=['business_id', 'date_length'], ascending=[True, False])  # Ordenar por business_id y longitud de la lista
             df_concat = df_concat.drop_duplicates(subset='business_id', keep='first')  # Mantener la primera fila para cada business_id (la más larga)
 
+            # Eliminar la columna 'date_length' creada de manera auxiliar al final del proceso
+            df_concat = df_concat.drop('date_length', axis=1)
+
             pass
         elif tipo == "user":
+            
             # Eliminar filas con valores nulos en user_id o review_count
-            df = df.dropna(subset=['user_id', 'review_count'])
+            df_nuevo = df_nuevo.loc[(df_nuevo['user_id'].notnull()) & (df_nuevo['review_count'].notnull())]
 
             # Definir criterio de integridad de fila
-            threshold = int(0.7 * len(df.columns))
+            threshold = int(0.7 * len(df_nuevo.columns))
 
             # Eliminar filas que no cumplen con el criterio de integridad
             df_nuevo = df_nuevo.dropna(thresh=threshold)
@@ -162,10 +166,7 @@ def procesar_nulos_duplicados(df_base,df_nuevo,df_unique_ids,tipo):
             df_concat = df_concat.drop_duplicates(subset='user_id', keep='first')
 
             # Encontrar los user_id únicos en df_concat
-            user_id_concat_unicos = df_concat['user_id'].unique()
-
-            # Filtrar los user_id que no están en user_unique_ids
-            user_unique_ids = pd.read_csv('data_tools/unique_user_ids.csv')
+            user_id_concat_unicos = df_concat['user_id'].unique()            
 
             user_id_no_en_unique = np.setdiff1d(user_id_concat_unicos, user_unique_ids['user_id'])
 
@@ -175,8 +176,8 @@ def procesar_nulos_duplicados(df_base,df_nuevo,df_unique_ids,tipo):
             # Combinar df_nuevos_user_id con df_unique_ids
             df_unique_actualizado = pd.concat([user_unique_ids, df_nuevos_user_id], ignore_index=True)
 
-            # Actualizar ids unicos
-            df_unique_actualizado.to_csv("data_tools/user_unique_ids.csv", index=False)
+            # Actualizar ids unicos de usuarios
+            ut.save_in_storage(bucket,"used_ids/unique_user_ids.csv",df_unique_actualizado)
 
             pass
 
