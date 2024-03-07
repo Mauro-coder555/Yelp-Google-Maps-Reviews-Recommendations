@@ -39,35 +39,34 @@ def cargar_df(path):
         print("Error al cargar el DataFrame:", e)
         return None
     
-def obtener_ruta_archivo_nuevo_csv():
-    # Ruta de la carpeta principal
-    carpeta_principal = "new/"
-
-    # Lista los archivos dentro de la carpeta principal
-    archivos = os.listdir(carpeta_principal)
-
-    # Encuentra el archivo CSV dentro de la lista de archivos
-    archivo_csv = next((archivo for archivo in archivos if archivo.endswith(".csv")), None)
-
-    # Si se encontró un archivo CSV, devuelve la ruta completa
-    if archivo_csv:
-        ruta_completa = os.path.join(carpeta_principal, archivo_csv)
-        return ruta_completa
+def obtener_ruta_archivo_nuevo_csv(bucket):
+    ruta_carpeta = "new/"  # Ruta de la carpeta que contiene el archivo
+    blobs_en_carpeta = bucket.list_blobs(prefix=ruta_carpeta)
+    lista_archivos = [blob.name for blob in blobs_en_carpeta if '.' in blob.name[len(ruta_carpeta):]]
+    if len(lista_archivos) == 1:  # Verifica si hay exactamente un archivo en la carpeta
+        return lista_archivos[0]
     else:
-        return None
+        raise ValueError("La carpeta 'new/' no contiene un único archivo.")
     
-def borrar_archivo_nuevo():
+def obtener_ruta_archivo_a_actualizar_csv(bucket, ruta):
+    blob = bucket.blob(ruta)
+    data = blob.download_as_bytes()
+    return data
+    
+def borrar_archivo_nuevo(bucket):
     # Ruta de la carpeta principal
     carpeta_principal = "new/"
 
     try:
-        # Elimina todos los archivos dentro de la carpeta
-        for archivo in os.listdir(carpeta_principal):
-            ruta_archivo = os.path.join(carpeta_principal, archivo)
-            if os.path.isfile(ruta_archivo):
-                os.remove(ruta_archivo)
+        # Lista los blobs dentro de la carpeta principal en el bucket
+        blobs = bucket.list_blobs(prefix=carpeta_principal)
+
+        # Elimina cada archivo dentro de la carpeta
+        for blob in blobs:
+            # Verifica si el blob es un archivo (no una carpeta)
+            if not blob.name.endswith('/'):
+                blob.delete()
+
         print("Se han borrado todos los archivos dentro de la carpeta 'new/'.")
-    except FileNotFoundError:
-        print("La carpeta 'new/yelp' no existe.")
-    except OSError as e:
+    except Exception as e:
         print(f"No se pudo eliminar los archivos de la carpeta 'new/': {e}")
