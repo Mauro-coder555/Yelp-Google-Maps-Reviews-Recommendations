@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 
-def check_rows(ruta_archivo, parametro):
+def check_rows(df, parametro):
     # Diccionario que contiene los nombres de columnas correspondientes a cada tabla
 
     # Basta que tengan todas las columnas mencionadas, se ignoraran las columnas sobrantes
@@ -15,20 +15,13 @@ def check_rows(ruta_archivo, parametro):
     
     # Verificar si el parámetro es válido
     if parametro not in columnas:
-        return "El parámetro especificado no es válido."
-    
-    # Cargar el archivo como un DataFrame de pandas
-    try:
-        df = pd.read_csv(ruta_archivo)
-    except FileNotFoundError:
-        return "El archivo no pudo ser encontrado."
-    except pd.errors.EmptyDataError:
-        return "El archivo está vacío."
-    
+        return False
+        
     # Verificar si el DataFrame contiene todas las columnas correspondientes al parámetro
     if all(col in df.columns for col in columnas[parametro]):
         return True
     else:
+        print("what")
         return False    
 
 
@@ -43,34 +36,38 @@ def procesar_nulos_duplicados(df_base,df_nuevo,df_unique_ids,tipo):
             df_nuevo = df_nuevo.dropna(thresh=threshold)
 
             # Reemplazar nulos en columnas categóricas con "sin datos"
-            df_nuevo[['name', 'address', 'city', 'state', 'postal_code', 'attributes', 'categories', 'hours']] = df_nuevo[['name', 'address', 'city', 'state', 'postal_code', 'attributes', 'categories', 'hours']].fillna('sin datos')
+            df_nuevo.loc[:, ['name', 'address', 'city', 'state', 'postal_code', 'attributes', 'categories', 'hours', 'is_open']] = df_nuevo.loc[:, ['name', 'address', 'city', 'state', 'postal_code', 'attributes', 'categories', 'hours', 'is_open']].fillna('sin datos')
 
-            # Eliminar filas con valores nulos en 'stars' o 'review_count'
-            df_nuevo = df_nuevo.dropna(subset=['stars', 'review_count'])
+            # Eliminar filas con valores nulos en 'business_id ', 'stars' o 'review_count'
+            df_nuevo = df_nuevo.dropna(subset=['business_id', 'stars', 'review_count', 'latitude', 'longitude'])
 
             # Concatenar dataframe base con dataframe nuevo
             df_concat = concatenar_dataframes(df_base, df_nuevo)
 
+            print(df_concat)
+
             # Eliminar filas duplicadas basadas en 'business_id' dejando solo la que mayor cantidad de reviews tenga
-            df_concat = df_concat.loc[df_concat.groupby('business_id')['reviews_count'].idxmax()]
+            df_concat = df_concat.loc[df_concat.groupby('business_id')['review_count'].idxmax()]
 
             # Resetear los índices después de las operaciones
             df_concat = df_concat.reset_index(drop=True)
 
-             # Encontrar los business_id únicos en df_concat
-            business_id_concat_unicos = df_concat['business_id'].unique()
+            print(df_concat)
 
-            # Filtrar los business_id que no están en df_unique_ids
-            business_id_no_en_unique = np.setdiff1d(business_id_concat_unicos, df_unique_ids['business_id'])
+           # Identificar business_id únicos presentes en df_concat pero no en df_unique_ids
+            nuevos_business_ids = set(df_concat['business_id']) - set(df_unique_ids['business_id'])
 
-            # Crear un DataFrame con los business_id que no están en df_unique_ids
-            df_nuevos_business_id = pd.DataFrame({'business_id': business_id_no_en_unique})
+            # Filtrar filas de df_concat que contienen los nuevos business_id
+            nuevos_datos = df_concat[df_concat['business_id'].isin(nuevos_business_ids)]
 
-            # Combinar df_nuevos_business_id con df_unique_ids
-            df_unique_actualizado = pd.concat([df_unique_ids, df_nuevos_business_id], ignore_index=True)
+            # Concatenar los nuevos datos al DataFrame df_unique_ids, manteniendo solo la columna "business_id"
+            df_unique_ids = pd.concat([df_unique_ids, nuevos_datos[['business_id']]], ignore_index=True)
 
-            # Actualizar ids unicos
-            df_unique_actualizado.to_csv("data_tools/unique_ids.csv", index=False)
+            # Eliminar duplicados en el dataframe df_unique_ids
+            df_unique_ids = df_unique_ids.drop_duplicates(subset=['business_id'])
+
+            # Guardar el dataframe actualizado en el archivo CSV
+            df_unique_ids.to_csv("data_tools/unique_business_ids_prueba.csv", index=False)
 
             pass
         elif tipo == "review":
@@ -184,11 +181,11 @@ def procesar_nulos_duplicados(df_base,df_nuevo,df_unique_ids,tipo):
             pass
 
         return df_concat
-        
+
 def concatenar_dataframes(df_base, df_nuevo):
     # Concatena los DataFrames
     df_concat = pd.concat([df_base, df_nuevo], ignore_index=True)
-
+    
     # Elimina las duplicaciones
     df_concat = df_concat.drop_duplicates()
 
