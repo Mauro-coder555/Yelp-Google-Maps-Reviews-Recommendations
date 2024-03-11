@@ -1,11 +1,9 @@
 from google.oauth2 import service_account
 from google.cloud import storage
 import pandas as pd
-import os
+import reverse_geocoder as rg
 
-def set_config():
-    # Configuración de Google Cloud Storage
-    bucket_name = "yelp-ggmaps-data"
+def set_config(bucket_name):    
 
     # Ruta al archivo JSON de credenciales
     credentials_path = "../credentials/eminent-cycle-415715-3ef9bde04901.json"
@@ -38,15 +36,28 @@ def cargar_df(path):
     except Exception as e:
         print("Error al cargar el DataFrame:", e)
         return None
-    
-def obtener_ruta_archivo_nuevo_csv(bucket):
-    ruta_carpeta = "new/"  # Ruta de la carpeta que contiene el archivo
-    blobs_en_carpeta = bucket.list_blobs(prefix=ruta_carpeta)
-    lista_archivos = [blob.name for blob in blobs_en_carpeta if '.' in blob.name[len(ruta_carpeta):]]
-    if len(lista_archivos) == 1:  # Verifica si hay exactamente un archivo en la carpeta
-        return lista_archivos[0]
-    else:
-        raise ValueError("La carpeta 'new/' no contiene un único archivo.")
+
+def descargar_archivo_gcs(bucket_nombre, ruta_archivo):
+     # Ruta al archivo JSON de credenciales
+    credentials_path = "../credentials/eminent-cycle-415715-3ef9bde04901.json"
+
+    # Crear credenciales a partir del archivo JSON
+    credentials = service_account.Credentials.from_service_account_file(credentials_path)
+
+    # Crear cliente de almacenamiento con las credenciales
+    cliente = storage.Client(credentials=credentials)
+
+    # Obtener el bucket
+    bucket = cliente.bucket(bucket_nombre)
+
+    # Obtener el blob (archivo) dentro del bucket
+    blob = bucket.blob(ruta_archivo)
+
+    # Descargar el contenido del archivo como bytes
+    contenido_bytes = blob.download_as_bytes()
+
+    return contenido_bytes    
+
     
 def obtener_data_archivo_a_actualizar_csv(bucket, ruta):
     blob = bucket.blob(ruta)
@@ -70,3 +81,59 @@ def borrar_archivo_nuevo(bucket):
         print("Se han borrado todos los archivos dentro de la carpeta 'new/'.")
     except Exception as e:
         print(f"No se pudo eliminar los archivos de la carpeta 'new/': {e}")
+
+
+def asignar_tipo_archivo(ruta):
+    if "yelp" in ruta:
+        if "business" in ruta:
+            tipo_archivo = "business"
+        elif "checkin" in ruta:
+            tipo_archivo = "checkin"
+        elif "tip" in ruta:
+            tipo_archivo = "tip"
+        elif "review" in ruta:
+            tipo_archivo = "review"
+        elif "sitio" in ruta:
+            tipo_archivo = "sitio"
+        else:
+            tipo_archivo = None
+    elif "google" in ruta:
+        if "review" in ruta:
+            tipo_archivo = "review"
+        elif "sitio" in ruta:
+            tipo_archivo = "sitio"
+        else:
+            tipo_archivo = None
+    else:
+        tipo_archivo = None
+
+    return tipo_archivo
+
+def corregir_ubicaciones(df):
+    # Aplicar la función obtener_ubicacion a las columnas latitude y longitude
+    df['ubicacion'] = df.apply(lambda row: obtener_ubicacion(row['latitude'], row['longitude']), axis=1)
+    
+    # Actualizar los campos 'state' y 'city' basados en las nuevas columnas generadas
+    df['state'] = df['ubicacion'].apply(lambda x: x['estado'])
+    df['city'] = df['ubicacion'].apply(lambda x: x['ciudad'])
+    
+    # Eliminar la columna 'ubicacion' generada auxiliar
+    df = df.loc[:, df.columns != 'ubicacion']
+    
+    return df
+
+
+# Función para obtener estado y ciudad a partir de latitud y longitud
+def obtener_ubicacion(latitud, longitud):
+    try:
+        # Obtener información de ubicación utilizando Reverse Geocoder
+        results = rg.search((latitud, longitud))
+
+        # Extraer el estado y la ciudad de los resultados
+        estado = results[0]['admin1']
+        ciudad = results[0]['name']
+
+        return {"estado": estado, "ciudad": ciudad}
+    except Exception:
+        # Si no se encuentra la ubicación, devolver valores vacíos
+        return {"estado": "sin datos", "ciudad": "sin datos"}

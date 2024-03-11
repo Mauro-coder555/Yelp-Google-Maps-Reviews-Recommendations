@@ -9,15 +9,9 @@ import ETL_functions as etl
 
 importlib.reload(ut)
 
-def process_file(tipo_archivo):
-    print("hola")
-
-    # Descargar los datos del blob y cargarlos en un DataFrame
-    bucket = ut.set_config()
-    ruta_carpeta = ut.obtener_ruta_archivo_nuevo_csv(bucket)   
-    original_blob_path = ruta_carpeta  # Esto supone que solo hay un archivo en la carpeta "new/"
-    original_blob = bucket.blob(original_blob_path)
-    data = original_blob.download_as_bytes()
+def process_file(bucket,ruta): # Retorna verdadero  o falso si todo sale bien o mal
+   
+    data = ut.descargar_archivo_gcs(bucket,ruta)
 
     # Cargar el archivo como un DataFrame de pandas
     try:
@@ -28,7 +22,11 @@ def process_file(tipo_archivo):
         return False
     print(df.columns)
     
-    if not etl.check_rows(df,tipo_archivo):
+    tipo_archivo = ut.asignar_tipo_archivo(ruta)
+    if tipo_archivo is None:
+        return False
+
+    if not etl.check_rows_yelp(df,tipo_archivo):
         return False
 
     # Casos para hacer cosas en función del parámetro
@@ -59,10 +57,6 @@ def process_file(tipo_archivo):
 
         df = df[df['business_id'].isin(unique_ids['business_id'])]
 
-        #Abrir dataframe para guardar luego los ids de usuarios nuevos que se sumaran al archivo base
-        data_business_unique_ids = ut.obtener_data_archivo_a_actualizar_csv(bucket,'used_ids/unique_user_ids.csv')
-        user_unique_ids = pd.read_csv(io.BytesIO(data_business_unique_ids))  
-
         # Proceso ETL
         etl.procesar_nulos_duplicados(ut.cargar_df(processed_blob_path),df, unique_ids,user_unique_ids,bucket, tipo_archivo)
 
@@ -75,10 +69,6 @@ def process_file(tipo_archivo):
         data_business_unique_ids = ut.obtener_data_archivo_a_actualizar_csv(bucket,'used_ids/unique_business_ids.csv')
         unique_ids = pd.read_csv(io.BytesIO(data_business_unique_ids))
         df = df[df['business_id'].isin(unique_ids['business_id'])]
-
-        #Abrir dataframe para guardar luego los ids de usuarios nuevos que se sumaran al archivo base
-        data_business_unique_ids = ut.obtener_data_archivo_a_actualizar_csv(bucket,'used_ids/unique_user_ids.csv')
-        user_unique_ids = pd.read_csv(io.BytesIO(data_business_unique_ids))
 
         # Proceso ETL
         etl.procesar_nulos_duplicados(ut.cargar_df(processed_blob_path),df, unique_ids,user_unique_ids,bucket, tipo_archivo)
@@ -94,11 +84,7 @@ def process_file(tipo_archivo):
         unique_ids = pd.read_csv(io.BytesIO(data_business_unique_ids))
 
         df = df[df['business_id'].isin(unique_ids['business_id'])]
-
-        #Abrir dataframe para guardar luego los ids de usuarios nuevos que se sumaran al archivo base
-        data_business_unique_ids = ut.obtener_data_archivo_a_actualizar_csv(bucket,'used_ids/unique_user_ids.csv')
-        user_unique_ids = pd.read_csv(io.BytesIO(data_business_unique_ids))
-
+      
         # Proceso ETL
         etl.procesar_nulos_duplicados(ut.cargar_df(processed_blob_path), df, unique_ids, user_unique_ids,bucket, tipo_archivo)
             
