@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import utils as ut
 
-def check_rows(df, parametro):
+def check_rows_yelp(df, parametro):
     # Diccionario que contiene los nombres de columnas correspondientes a cada tabla
 
     # Basta que tengan todas las columnas mencionadas, se ignoraran las columnas sobrantes
@@ -21,9 +21,28 @@ def check_rows(df, parametro):
     # Verificar si el DataFrame contiene todas las columnas correspondientes al parámetro
     if all(col in df.columns for col in columnas[parametro]):
         return True
-    else:
-        print("what")
-        return False    
+    else:     
+        return False
+
+
+def check_rows_google(df, parametro):
+    # Diccionario que contiene los nombres de columnas correspondientes a cada tabla
+
+    # Basta que tengan todas las columnas mencionadas, se ignoraran las columnas sobrantes
+    columnas = {
+        "metadata_sitios": ["gmap_id", "name", "address", "city", "state", "latitude", "longitude", "avg_rating", "num_of_reviews", "category"],
+        "review_estados": ["gmap_id", "rating", "time", "text"]       
+    }
+    
+    # Verificar si el parámetro es válido
+    if parametro not in columnas:
+        return False
+        
+    # Verificar si el DataFrame contiene todas las columnas correspondientes al parámetro
+    if all(col in df.columns for col in columnas[parametro]):
+        return True
+    else:    
+        return False      
 
 
 def procesar_nulos_duplicados(df_base,df_nuevo,df_unique_business_ids,user_unique_ids,bucket,tipo):        
