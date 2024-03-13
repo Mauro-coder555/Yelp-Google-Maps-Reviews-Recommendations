@@ -5,29 +5,12 @@ import io
 import importlib
 
 import utils as ut
-import ETL_functions as etl
+import cloud_functions.etl_functions as etl
 
 importlib.reload(ut)
 
-def process_file(bucket,ruta): # Retorna verdadero  o falso si todo sale bien o mal
-   
-    data = ut.descargar_archivo_gcs(bucket,ruta)
-
-    # Cargar el archivo como un DataFrame de pandas
-    try:
-        df = pd.read_csv(io.BytesIO(data)) # DF A PARTIR DEL NUEVO ARCHIVO QUE INGRESO EL CLIENTE
-    except FileNotFoundError:
-        return False
-    except pd.errors.EmptyDataError:
-        return False
-    print(df.columns)
+def process_file(df,bucket_entrada,bucket_salida,tipo_archivo): # Retorna verdadero  o falso si todo sale bien o mal  
     
-    tipo_archivo = ut.asignar_tipo_archivo(ruta)
-    if tipo_archivo is None:
-        return False
-
-    if not etl.check_rows_yelp(df,tipo_archivo):
-        return False
 
     # Casos para hacer cosas en función del parámetro
     if tipo_archivo == "business":       
@@ -37,12 +20,12 @@ def process_file(bucket,ruta): # Retorna verdadero  o falso si todo sale bien o 
         df = df[(df['state'] == 'FL') | (df['state'] == 'CA') | (df['state'] == 'NV')]
 
         #Abrir dataframe para guardar luego los ids de negocios nuevos que se sumaran al archivo base
-        data_business_unique_ids = ut.obtener_data_archivo_a_actualizar_csv(bucket,'used_ids/unique_business_ids.csv')
+        data_business_unique_ids = ut.obtener_data_archivo_a_actualizar(bucket_salida,'used_ids/business_ids.csv')
         unique_ids = pd.read_csv(io.BytesIO(data_business_unique_ids))
 
         # Proceso ETL
 
-        data_archivo_a_actualizar = ut.obtener_data_archivo_a_actualizar_csv(bucket,processed_blob_path)
+        data_archivo_a_actualizar = ut.obtener_data_archivo_a_actualizar(bucket_salida,processed_blob_path)
         df_a_actualizar = pd.read_csv(io.BytesIO(data_archivo_a_actualizar))
         df_final = etl.procesar_nulos_duplicados(df_a_actualizar,df, unique_ids,unique_ids,bucket, tipo_archivo)
             
