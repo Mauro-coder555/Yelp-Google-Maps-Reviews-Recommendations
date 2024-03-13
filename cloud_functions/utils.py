@@ -243,17 +243,19 @@ def obtener_estado(nombre_archivo):
 
 def filtrar_por_categoria_google(df):
     # Convertir todos los valores de la columna 'category' a minúsculas
-    df['category'] = df['category'].str.lower()
+    df['category'] = df['category'].apply(lambda x: [i.lower() for i in x] if isinstance(x, list) else x)
     
     # Definir las palabras clave que estamos buscando en las listas de 'category'
     keywords = ['hotel', 'restaurant']
     
     # Función para verificar si la lista contiene una de las palabras clave
     def check_keywords(category_list):
-        for keyword in keywords:
-            if keyword in category_list:
-                return keyword.capitalize()  # Devuelve la palabra clave con la primera letra mayúscula
-        return None  # Si no se encuentra ninguna palabra clave
+        if isinstance(category_list, list):  # Verifica si el valor es una lista
+            for keyword in keywords:
+                if any(keyword in item for item in category_list):
+                    return keyword.capitalize()
+        return None  # Retorna None para valores no válidos o nulos
+
     
     # Aplicar la función a cada fila de la columna 'category'
     df['category'] = df['category'].apply(check_keywords)
@@ -262,7 +264,6 @@ def filtrar_por_categoria_google(df):
     df = df.dropna(subset=['category'])
     
     return df
-
 def filtrar_fechas_validas(df, date_column='date', min_date='1970-01-01', max_date='2038-01-19'):
     # Función para convertir fechas Unix en milisegundos a formato datetime
     def convertir_fecha_unix(fecha):
