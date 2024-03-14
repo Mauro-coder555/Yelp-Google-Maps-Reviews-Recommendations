@@ -37,5 +37,3 @@ def hello_gcs(nombre_archivo):
         return False
     
 hello_gcs("raw_google_reviews_sample.json")
-
-print("hola")

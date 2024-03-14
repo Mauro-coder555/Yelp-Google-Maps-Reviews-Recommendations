@@ -20,6 +20,20 @@ def get_bucket(bucket_name):
 
     return bucket
 
+def verificar_tamanio_dataframe(bucket, blob_name, max_tamanio_mb):    
+ 
+    # Leer el DataFrame desde el buffer
+    dataframe = descargar_archivo_gcs(bucket,blob_name)
+    
+    # Calcular el tamaño del DataFrame en megabytes
+    tamanio_mb = dataframe.memory_usage(deep=True).sum() / (1024 ** 2)
+    
+    # Verificar si el tamaño del DataFrame es menor que el máximo especificado
+    if tamanio_mb < max_tamanio_mb:
+        return True
+    else:
+        return False
+
 def save_in_storage(bucket,path,df):
      #Exportar / Guardar el DataFrame filtrado ya definito / procesado
        

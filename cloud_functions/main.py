@@ -9,9 +9,10 @@ import google_maps_etl
 def hello_gcs(cloud_event):
     print(cloud_event.data["name"])
 
+   
     nombre_archivo = cloud_event.data["name"]
 
-    bucket_entrada_nombre = cloud_event.context["bucket"]
+    bucket_name = nombre_archivo.split("/")[0]
     bucket_entrada = ut.get_bucket(bucket_entrada_nombre)
     
     bucket_salida_nombre = 'yelp_gmaps_work'
