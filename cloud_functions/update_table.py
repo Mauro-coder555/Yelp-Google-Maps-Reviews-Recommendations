@@ -44,8 +44,8 @@ from google.cloud import storage
 from google.oauth2 import service_account
 from google.cloud.exceptions import NotFound
 
-def crear_actualizar_tabla(event, context, codigo_tabla, nombre_archivo): 
-
+def crear_actualizar_tabla(event, context,nombre_archivo): 
+    codigo_tabla = "eminent-cycle-415715.prueba_id_business."
     # La tabla tendra el nombre del archivo
     nombre_tabla = nombre_archivo.split('.')[0].upper()
     codigo_tabla = codigo_tabla + nombre_tabla
