@@ -97,4 +97,9 @@ La aplicación desarrollada proporcionará:
 Para obtener información detallada sobre la conexión a Google Cloud y la verificación de servicios API, consulta nuestra documentación en [Notion](https://www.notion.so/Documentaci-n-c90a6c8e6f554db2b427b147d8bac6e6?pvs=4).
 
 ## WebApp
+Consideraciones a tener en cuenta
+*La WebApp acepta solo archivos csv, json y pickle.
+*Si se sube un archivo de estructura Yelp debe incluir la palabra Yelp y el nombre de la tabla en el nombre del archivo.
+*Si se sube un archivo de estructura Google-maps debe incluir la palabra Google y el nombre de la tabla en el nombre del archivo.
+Para más información del contrato acceder al siguiente link: https://www.notion.so/Contrato-627d11fdc3154d0da7378f9f707850e1
 Link: https://review-analysis-system.onrender.com
