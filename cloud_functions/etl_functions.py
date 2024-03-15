@@ -7,7 +7,6 @@ from nltk.sentiment import SentimentIntensityAnalyzer
 
 def check_rows_yelp(df, parametro):
     # Diccionario que contiene los nombres de columnas correspondientes a cada tabla
-
     # Basta que tengan todas las columnas mencionadas, se ignoraran las columnas sobrantes
     columnas = {
         "business": ["business_id", "name", "address", "city", "state", "postal_code", "latitude", "longitude", "stars", "review_count", "is_open", "attributes", "categories", "hours"],
@@ -52,7 +51,7 @@ def procesar_yelp(df_base,df_nuevo,df_unique_business_ids,bucket,tipo):
         # Casos para hacer cosas en función del parámetro
         if tipo == "business":            
             # Dejamos solo las columnas relevantes para el analisis
-            columnas_a_conservar = ["business_id", "name", "address", "city", "state", "latitude", "longitude", "stars", "review_count", "is_open", "attributes", "categories"]
+            columnas_a_conservar = ["business_id", "name", "address", "city", "state", "latitude", "longitude", "stars", "review_count", "attributes", "categories"]
             df_nuevo = df_nuevo.loc[:, columnas_a_conservar]
 
             # Definir criterio de integridad de fila 70% de fila debe tener datos no nulos
@@ -62,7 +61,7 @@ def procesar_yelp(df_base,df_nuevo,df_unique_business_ids,bucket,tipo):
             df_nuevo = df_nuevo.dropna(thresh=threshold)
 
             # Reemplazar nulos en columnas categóricas con "sin datos"
-            df_nuevo.loc[:, ['name', 'address', 'city', 'state', 'attributes', 'categories', 'is_open']] = df_nuevo.loc[:, ['name', 'address', 'city', 'state', 'attributes', 'categories', 'is_open']].fillna('sin datos')
+            df_nuevo.loc[:, ['name', 'address', 'city', 'state', 'attributes', 'categories']] = df_nuevo.loc[:, ['name', 'address', 'city', 'state', 'attributes', 'categories']].fillna('sin datos')
 
             # Eliminar filas con valores nulos en 'business_id ', 'stars' o 'review_count'
             df_nuevo = df_nuevo.dropna(subset=['business_id', 'stars', 'review_count', 'latitude', 'longitude'])            
@@ -121,7 +120,7 @@ def procesar_yelp(df_base,df_nuevo,df_unique_business_ids,bucket,tipo):
 
             # Imputar valores nulos en el DataFrame
             df_nuevo['date'] = df_nuevo['date'].fillna(pd.NaT)
-            df_nuevo['stars'] = df_nuevo['stars'].fillna("sin datos")
+            df_nuevo['stars'] = df_nuevo['stars'].fillna(np.nan)
 
             if df_base is not None:
                 # Concatenar dataframe base con dataframe nuevo
@@ -199,25 +198,23 @@ def procesar_google(df_base,df_nuevo,df_unique_business_ids,bucket,tipo):
             df_nuevo = df_nuevo.dropna(thresh=threshold)
 
             # Reemplazar nulos en columnas categóricas con "sin datos"
-            df_nuevo.loc[:, ['name', 'address', 'price']] = df_nuevo.loc[:,  ['name', 'address', 'price']].fillna('sin datos')
+            df_nuevo.loc[:, ['name', 'address']] = df_nuevo.loc[:,  ['name', 'address']].fillna('sin datos')
 
             # Transformar los valores de la columna price (cantidad de signos a numero)
             #Aplica la función a la columna 'price' del dataframe
             df_nuevo['price'] = df_nuevo['price'].apply(contar_signos)
 
             # Eliminar filas con valores nulos en columnas clave
-            df_nuevo = df_nuevo.dropna(subset=['gmap_id', 'avg_rating', 'category',"latitude","longitude","num_of_reviews"])
-            
+            df_nuevo = df_nuevo.dropna(subset=['gmap_id', 'avg_rating', 'category',"latitude","longitude","num_of_reviews"])            
 
-            print("antes de filtrar categoria" + str(df_nuevo))
+
             # Redefinir las categorias y dejar una sola por fila en la columna "category"
             df_nuevo = ut.filtrar_por_categoria_google(df_nuevo)
-            print("despues de filtrar categoria" + str(df_nuevo))
+         
             # Se renombran las columnas para unificarlas con el dataset de yelp
             df_nuevo.rename(columns={'num_of_reviews': 'review_count', 'gmap_id': 'business_id', 'avg_rating':'stars'}, inplace=True)
 
-            # Concatenar dataframe base con dataframe nuevo
-            
+            # Concatenar dataframe base con dataframe nuevo            
             if df_base is not None:
                 # Concatenar dataframe base con dataframe nuevo
                 df_concat = concatenar_dataframes(df_base, df_nuevo)
@@ -227,17 +224,18 @@ def procesar_google(df_base,df_nuevo,df_unique_business_ids,bucket,tipo):
                         
             # Eliminar filas duplicadas basadas en 'business_id' dejando solo la que mayor cantidad de reviews tenga
             df_concat = df_concat.loc[df_concat.groupby('business_id')['review_count'].idxmax()]
-
-            # Resetear los índices después de las operaciones
-            
-            df_concat = df_concat.reset_index(drop=True)
-
+           
                        
             # Eliminamos duplicados si se mezclaron datos de distintas fuentes mediante coordenadas y nombre del negocio
             df_concat = eliminar_duplicados_distintas_fuentes(df_concat)
 
+            # Redondea estrellas en incrementos de 0.5 
+            df_concat['stars'] = df_concat['stars'].apply(lambda x: round(x * 2) / 2)
+
+            # Resetear los índices después de las operaciones            
+            df_concat = df_concat.reset_index(drop=True)
             
-           # Identificar business_id únicos presentes en df_concat pero no en df_unique_business_ids
+            # Identificar business_id únicos presentes en df_concat pero no en df_unique_business_ids
             nuevos_business_ids = set(df_concat['business_id']) - set(df_unique_business_ids['business_id'])
 
             # Filtrar filas de df_concat que contienen los nuevos business_id
@@ -245,6 +243,7 @@ def procesar_google(df_base,df_nuevo,df_unique_business_ids,bucket,tipo):
 
             # Concatenar los nuevos datos al DataFrame df_unique_business_ids, manteniendo solo la columna "business_id"
             df_unique_business_ids = pd.concat([df_unique_business_ids, nuevos_datos[['business_id']]], ignore_index=True)
+
 
             # Eliminar duplicados en el dataframe df_unique_business_ids
             df_unique_business_ids = df_unique_business_ids.drop_duplicates(subset=['business_id'])
@@ -259,7 +258,7 @@ def procesar_google(df_base,df_nuevo,df_unique_business_ids,bucket,tipo):
             # Dejamos solo las columnas relevantes para el analisis
             columnas_a_conservar = ["time", "rating", "text", "gmap_id"]
             df_nuevo = df_nuevo.loc[:, columnas_a_conservar]
-            print/df_nuevo["gmap_id"]
+        
             # Realizar la comprobación de ids existentes, no agregamos reseñas que tengas id's de sitios que no existan en la base de antemano
             df_nuevo = df_nuevo[df_nuevo['gmap_id'].isin(df_unique_business_ids['business_id'])]
 
@@ -268,7 +267,7 @@ def procesar_google(df_base,df_nuevo,df_unique_business_ids,bucket,tipo):
             df_nuevo = df_nuevo.loc[df_nuevo[columnas_clave].notnull().all(axis=1)]
                  
        
-            df_nuevo['rating'] = df_nuevo['rating'].fillna("sin datos")
+            df_nuevo['rating'] = df_nuevo['rating'].fillna(np.nan)
 
             # Se renombran las columnas para unificarlas con el dataset de yelp
             df_nuevo.rename(columns={'time': 'date', 'gmap_id': 'business_id', 'rating':'stars'}, inplace=True)
@@ -343,10 +342,6 @@ def contar_signos(cadena):
         return np.nan
 
 from Levenshtein import distance
-
-
-
-
 from scipy.spatial.distance import cdist
 import Levenshtein
 
